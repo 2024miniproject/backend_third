@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+    <style>
+        /* 페이지 레이아웃 기본 설정 */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* 본문 스타일 */
+        .postbox {
+            margin-left: 100px; /* 사이드바 넓이 + 여백 */
+            padding: 20px;
+            width: calc(100% - 100px); /* 전체 화면에서 사이드바 넓이를 뺀 값 */
+        }
+
+        /* 게시글 스타일 */
+        .post {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #fff;
+            position: relative;
+        }
+
+        /* 삭제 버튼 스타일 */
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* 이미지 스타일 */
+        .post img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 링크 스타일 */
+        .post-title {
+            cursor: pointer;
+            color: #007BFF; /* 링크 색상 */
+            text-decoration: underline; /* 밑줄 */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <button class="plus-button" id="addPostButton">+</button>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="icon" onclick="location.href='/home'">🏠</span> Home</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'">📦</span> My deal</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/information'">ℹ️</span> Info</a></li>
+        </ul>
+    </div>
+
+    <!-- 본문 -->
+    <div class="postbox">
+        <h1>판매글 목록</h1>
+        <div class="posts">
+            {% for post in posts %}
+                <div class="post">
+                    <h2 class="post-title" onclick="location.href='{{ url_for('detail.detail', post_id=post.id) }}'">{{ post.title }}</h2>
+                    <p>가격: {{ post.price }} 원</p>
+                    <p>{{ post.content }}</p>
+
+                    {% if post.image_filename %}
+                        <!-- 업로드한 이미지 표시 -->
+                        <img src="{{ url_for('static', filename=post.image_filename) }}" alt="Uploaded Image">
+                    {% endif %}
+
+                </div>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        let isFirstClick = true;  // 처음 클릭 여부
+
+        document.getElementById('addPostButton').onclick = function() {
+            if (isFirstClick) {
+                // 처음 클릭 시 write.html로 이동
+                isFirstClick = false;  // 다음 클릭부터는 팝업창이 뜸
+                window.location.href = "{{ url_for('write_views.write') }}";  // 작성 페이지로 이동
+            } else {
+                // 두 번째 클릭부터는 팝업창을 띄움
+                const confirmation = confirm("작성을 취소하시겠습니까?");
+                if (confirmation) {
+                    // 확인 버튼을 누르면 write.html 초기 화면으로 리다이렉션
+                    window.location.href = "{{ url_for('write_views.write') }}";  // 작성 페이지로 이동
+                }
+                // 취소 버튼을 누르면 아무 일도 일어나지 않음
+            }
+        }
+    </script>
+</body>
+</html>

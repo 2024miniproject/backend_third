@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글작성</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='write.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+</head>
+
+<body>
+<!-- 사이드바 -->
+<div class="sidebar">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <button class="plus-button" id="add-button">+</button> <!-- ID 추가 -->
+    </div>
+
+    <ul class="menu">
+        <li><a href="#"><span class="icon" onclick="location.href='/home'">🏠</span> Home</a></li>
+        <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'">📦</span> My deal</a></li>
+        <li><a href="#"><span class="icon" onclick="location.href='/information'">ℹ️</span> Info</a></li>
+    </ul>
+</div>
+
+<!-- Form 영역 -->
+<form action="{{ url_for('write_views.write') }}" method="post" enctype="multipart/form-data">
+    <div class="title">제목</div>
+    <input class="titlearea" type="text" id="title" name="title" placeholder="제목을 입력하세요!" required><br>
+
+    <hr class="line1">
+    <div class="price">가격</div>
+    <input class="pricearea" type="text" id="price" name="price" placeholder="이번 제품은 얼마인가요?" required><br>
+
+    <hr class="line2">
+
+    <!-- 내용 입력 영역 -->
+    <div class="textarea-wrapper">
+        <textarea class="textarea" id="content" name="content" placeholder="내용을 입력하세요." rows="1"
+                  oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                  required></textarea><br>
+    </div>
+
+    <!-- 사진 업로드 부분을 내용 입력 영역 아래로 이동 -->
+    <label class="upload-box" for="file-upload">
+        <span class="upload-icon">+</span> 사진 업로드
+    </label>
+    <input id="file-upload" type="file" name="files" multiple accept="image/*" style="display: none;"
+           onchange="previewImage(event)">
+
+    <div id="image-container"></div> <!-- 이미지 미리보기 영역 -->
+
+    <button class="publish-button" type="submit">발행하기</button>
+</form>
+
+<!-- 미리보기 스크립트 -->
+<script>
+    // 이미지 미리보기 함수
+    function previewImage(event) {
+        var output = document.getElementById('image-container');
+        output.innerHTML = ''; // 이전 미리보기 이미지 초기화
+        for (var i = 0; i < event.target.files.length; i++) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                output.innerHTML += '<img src="'+e.target.result+'" style="max-width: 100%; height: auto; margin: 5px;"/>';  // 모든 미리보기 이미지 추가
+            };
+            reader.readAsDataURL(event.target.files[i]);  // 모든 파일을 읽어 미리보기 표시
+        }
+    }
+
+    // + 버튼 클릭 이벤트 처리
+    let clickCount = 0;
+
+    document.querySelector('#add-button').addEventListener('click', function(event) {
+        clickCount++;
+        if (clickCount === 1) {
+            // 첫 번째 클릭 시 글 작성 페이지로 이동
+            window.location.href = "{{ url_for('write_views.write') }}";
+        } else {
+            // 두 번째 클릭 이후에는 팝업창 표시
+            event.preventDefault(); // 기본 동작 방지
+            if (confirm("작성을 취소하시겠습니까?")) {
+                // 확인 버튼을 누른 경우
+                window.location.href = "{{ url_for('write_views.write') }}"; // 글 작성 페이지로 이동
+            }
+            // 취소 버튼을 누른 경우 아무것도 하지 않음
+        }
+    });
+</script>
+</body>
+</html>

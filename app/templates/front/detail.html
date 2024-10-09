@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+    <style>
+        /* 구매 신청 완료 시 버튼 색을 회색으로 바꾸는 스타일 */
+        .buy.clicked {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <button class="plus-button" onclick="location.href='write.html'">+</button>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="icon" onclick="location.href='/home'">🏠</span> Home</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'">📦</span> My deal</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/information'">ℹ️</span> Info</a></li>
+        </ul>
+    </div>
+
+    <div class="imagebox">
+        {% if post.image_filename %}
+            <img src="{{ url_for('static', filename=post.image_filename) }}" alt="Uploaded Image" style="max-width: 100%; height: auto;">
+        {% endif %}
+    </div>
+
+    <div class="seller">
+        <img class="profilepic" src="X.jpeg">
+        <img class="sellm" src="X.jpeg">
+    </div>
+    <div class="sellname">
+        <h3>익명의 뽀삐</h3>
+        <p>최근 답장 - n 시간 전</p>
+    </div>
+    <div class="boxxx">
+        <h2>{{ post.title }}</h2> <!-- 게시글 제목 -->
+        <p>가격: {{ post.price }}원</p> <!-- 게시글 가격 -->
+        <div class="divide"></div>
+        <div class="sellingpost">
+            <p>{{ post.content }}</p> <!-- 게시글 내용 -->
+        </div>
+
+        <!-- 구매 신청하기 버튼 -->
+        <button class="buy" onclick="submit_Purchase()">구매 신청하기</button>
+
+        <hr>
+
+        <h5>답변</h5>
+        <div class="answer-box">
+            {% for answer in answers %}
+                <div class="answercomment">
+                    <p>{{ answer.content }}</p>
+                    <small>작성자: {{ answer.user.username }}</small> <!-- 작성자 이름 표시 -->
+                </div>
+            {% else %}
+                <p>답변이 없습니다.</p>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <h5>댓글</h5>
+        <div class="comment-box" id="commentBox">
+            <!-- 댓글이 여기에 추가됩니다. -->
+            {% for comment in comments %}
+                <div class="commentcomment">
+                    <img src="X.jpeg" class="commentpic">
+                    <div class="text-wrapper">
+                        <h3>{{ comment.username }}</h3> <!-- 댓글 작성자 이름 -->
+                        <p>{{ comment.content }}</p> <!-- 댓글 내용 -->
+                        <small>작성일: {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small> <!-- 작성일 표시 -->
+                    </div>
+                </div>
+            {% else %}
+                <p>댓글이 없습니다.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <textarea class="commentwrite" id="commentInput" placeholder="댓글을 추가해보세요."></textarea>
+        <button class="writebutton" onclick="submitComment()">댓글 달기</button>
+    </div>
+
+    <script>
+        function submitPurchase() {
+            // 버튼을 클릭한 상태로 바꾸기 (회색으로 변경)
+            var button = document.querySelector('.buy');
+            button.classList.add('clicked');
+            button.textContent = '구매 신청 완료';
+
+            // 팝업 메시지 띄우기
+            alert("구매 신청이 완료되었습니다. n일까지 0000-0000 계좌로 입금 바랍니다.");
+
+            // 현재 게시글의 ID 가져오기
+            var postId = {{ post.id }};
+
+            // AJAX 요청을 통해 상품 정보 가져오기
+            fetch('/submit_purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ post_id: postId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // mydealsell.html의 div.content에 추가
+                    const contentDiv = document.querySelector('.content'); // mydealsell.html의 div.content 선택
+                    contentDiv.innerHTML += `
+                        <div class="product-info">
+                            <h4>${data.data.title}</h4>
+                            <p>${data.data.content}</p>
+                            <p>가격: ${data.data.price}원</p>
+                        </div>
+                    `;
+                    // mydealsell.html로 이동
+                    window.location.href = '/mydeal_views/mydealsell';
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+
+        function submitComment() {
+            var commentText = document.getElementById('commentInput').value.trim();
+            var questionId = {{ post.id }};  // 현재 게시글의 ID를 가져옴
+            if (commentText) {
+                fetch('/add_comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ comment: commentText, question_id: questionId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('commentInput').value = '';
+                        fetchComments();
+                    } else {
+                        alert("댓글 추가에 실패했습니다.");
+                    }
+                });
+            } else {
+                alert("댓글 내용을 입력하세요.");
+            }
+        }
+
+
+        function fetchComments() {
+            var questionId = {{ post.id }};  // 현재 게시글의 ID를 가져옴
+            fetch(`/get_comments/${questionId}`)
+                .then(response => response.json())
+                .then(comments => {
+                    var commentBox = document.getElementById('commentBox');
+                    commentBox.innerHTML = '';
+                    comments.forEach(comment => {
+                        var newComment = document.createElement('div');
+                        newComment.className = 'commentcomment';
+                        newComment.innerHTML = `
+                            <img src="X.jpeg" class="commentpic">
+                            <div class="text-wrapper">
+                                <h3>${comment.username}</h3>
+                                <p>${comment.content}</p>
+                                <small>작성일: ${new Date(comment.created_at).toLocaleString()}</small>
+                            </div>
+                        `;
+                        commentBox.appendChild(newComment);
+                    });
+                });
+        }
+
+
+        // 페이지 로드 시 기존 댓글을 가져옴
+        window.onload = fetchComments;
+    </script>
+</body>
+</html>

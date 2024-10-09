@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 거래 상태 변경</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mydeal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+    <script>
+        function showSizeSelection() {
+            const size = prompt("사물함 사이즈를 선택해주세요 (중/소):"); // 사이즈 선택
+            const statusButton = document.getElementById('statusButton');
+
+            if (size === '중' || size === '소') {
+                alert(`${size}칸이 배정되었습니다! xx.xx까지 판매 상품을 넣어주세요`); // 성공 메시지
+                // 버튼 색상 변경
+                statusButton.style.backgroundColor = 'gray'; // 회색으로 변경
+
+            } else {
+                alert("잘못된 입력입니다.");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <button class="plus-button" onclick="location.href='write.html'">+</button>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="icon" onclick="location.href='/home'">🏠</span> Home</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'">📦</span> My deal</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/information'">ℹ️</span> Info</a></li>
+        </ul>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="content">
+        <!-- 사용자 정보 -->
+        <div class="user-info">
+            <div style="display: flex; gap:15px; align-items: flex-end;">
+                <span></span>
+                <img src="{{ url_for('static', filename='X.jpeg') }}" alt="User Icon" class="user-icon">
+                <p class="user-name">**님</p>
+            </div>
+            <div class="purchase-sale">
+                <button class="purchase-btn" onclick="location.href='/mydeal_views/mydealbuy'">구매</button>
+                <button class="sale-btn" onclick="location.href='/mydeal_views/mydealsell'">판매</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 상품 설명 섹션 -->
+            <div class="product-section">
+                <div class="aboutabout">
+                    <h4>상품명</h4>
+                    <p>상품 설명 이게 진짜 끝내주거든요 아 정말 좋은데 설명할 방법이 없네 이 책을 사면 4.5로 졸업하고 다음학기에 교환학생을 갈 수 있고 티켓팅을 성공하고</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="status-btn" id="statusButton" onclick="showSizeSelection()">판매 수락</button>
+                    <button class="status-btn2" id="changeStatusBtn">현황 조회</button>
+                </div>
+            </div>
+
+            <!-- 거래 상태 진행 -->
+            <div class="progress-bar hidden" id="progressBar">
+                <div class="step" id="step1">
+                    <span><img src="{{ url_for('static', filename='loading.png') }}" style="width:60px; height:60px; overflow:none;"></span>
+                    <p>거래 대기 중</p>
+                </div>
+                <div class="step" id="step2">
+                    <span><img src="{{ url_for('static', filename='money.png') }}" style="width:60px; height:60px; overflow:none;"></span>
+                    <p>입금 완료</p>
+                </div>
+                <div class="step" id="step3">
+                    <span><img src="{{ url_for('static', filename='box.png') }}" style="width:60px; height:60px; overflow:none;"></span>
+                    <p>사물함 크기 선택 완료</p>
+                </div>
+                <div class="step" id="step4">
+                    <span><img src="{{ url_for('static', filename='puttt.png') }}" style="width:60px; height:60px; overflow:none;"></span>
+                    <p>사물함 배치 완료</p>
+                </div>
+                <div class="step" id="step5">
+                    <span><img src="{{ url_for('static', filename='check.png') }}" style="width:60px; height:60px; overflow:none;"></span>
+                    <p>거래 완료</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='mydeal.js') }}"></script>
+</body>
+</html>
